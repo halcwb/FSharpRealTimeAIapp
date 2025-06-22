@@ -34,6 +34,10 @@
 !Directory.Build.props
 !Directory.Build.targets
 
+# Include .config folder
+!.config/
+!.config/**/*
+
 # Include VS Code settings (optional)
 !.vscode/
 !.vscode/settings.json

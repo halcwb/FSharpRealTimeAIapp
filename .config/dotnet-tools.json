@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "fable": {
+      "version": "4.25.0",
+      "commands": [
+        "fable"
+      ],
+      "rollForward": false
+    },
+    "paket": {
+      "version": "9.0.2",
+      "commands": [
+        "paket"
+      ],
+      "rollForward": false
+    }
+  }
+}
