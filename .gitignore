@@ -1,0 +1,42 @@
+# use an opt in strategy
+*
+
+# Include source files
+!src/
+!src/**/*.fs
+!src/**/*.fsx
+!src/**/*.fsproj
+
+# Include configuration files
+!package.json
+!package-lock.json
+!.gitignore
+!vite.config.js
+!vite.config.ts
+!tsconfig.json
+!.dotnet-tools.json
+
+# Include project files
+!*.md
+!*.txt
+!LICENSE
+
+# Include public assets
+!public/
+!public/**/*
+
+# Include root HTML
+!index.html
+
+# Include dotnet files
+!*.sln
+!global.json
+!Directory.Build.props
+!Directory.Build.targets
+
+# Include VS Code settings (optional)
+!.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+

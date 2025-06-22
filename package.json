@@ -1,0 +1,40 @@
+{
+    "name": "FSharpRealTimeAIApp",
+    "version": "1.0.0",
+    "description": "Using AI to talk to your app",
+    "private": true,
+    "type": "module",
+    "engines": {
+        "node": "~18 || ~22 || ~23",
+        "npm": "~9 || ~10 || ~11 || ~18 || ~22"
+    },
+    "devDependencies": {
+        "@types/node": "^24.0.3",
+        "@vitejs/plugin-react": "^4.5.2",
+        "autoprefixer": "^10.4.21",
+        "postcss": "^8.4.38",
+        "sass": "^1.89.2",
+        "vite": "^6.1.0",
+        "vite-plugin-inspect": "^10.1.1"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.11.4",
+        "@emotion/styled": "^11.11.5",
+        "@fontsource/roboto": "^4.5.8",
+        "@mui/icons-material": "^7.1.2",
+        "@mui/material": "^7.1.2",
+        "@mui/x-data-grid": "^7.29.6",
+        "react": "^19.0.0",
+        "react-dom": "^19.1.0",
+        "react-markdown": "^9.0.1"
+    },
+    "scripts": {
+        "restore-tools": "dotnet tool restore",
+        "fable": "dotnet fable src/RealTimeAIApp.fsproj --outDir build --extension .jsx",
+        "fable:watch": "dotnet fable watch src/RealTimeAIApp.fsproj --outDir build --extension .jsx",
+        "dev": "npm run fable:watch & vite",
+        "build": "npm run fable && vite build",
+        "preview": "vite preview",
+        "clean": "rm -rf dist build"
+    }
+}

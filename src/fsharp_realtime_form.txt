@@ -1,0 +1,959 @@
+let view (state: State) (dispatch: Msg -> unit) =
+    Mui.themeProvider [
+        themeProvider.children [
+            Mui.cssBaseline []
+            Mui.container [
+                container.maxWidth.lg
+                container.sx [ style.paddingTop 2 ]
+                container.children [
+                    Mui.appBar [
+                        appBar.position.static
+                        appBar.color.primary
+                        appBar.children [
+                            Mui.toolbar [
+                                Mui.typography [
+                                    typography.variant.h6
+                                    typography.component' "h1"
+                                    typography.sx [ style.flexGrow 1 ]
+                                    typography.children "Add a new vehicle"
+                                ]
+                                
+                                if state.IsConnecting then
+                                    Mui.circularProgress [
+                                        circularProgress.size 24
+                                        circularProgress.sx [ style.marginRight 2 ]
+                                    ]
+                                
+                                micButton state.MicStatus (fun () -> dispatch ToggleMic)
+                                
+                                Mui.button [
+                                    button.variant.contained
+                                    button.color.secondary
+                                    button.onClick (fun _ -> dispatch ValidationRequested)
+                                    button.startIcon (Mui.icon "save")
+                                    button.sx [ style.marginLeft 2 ]
+                                    button.children "Save"
+                                ]
+                            ]
+                        ]
+                    ]
+                    
+                    // Error display
+                    match state.Error with
+                    | Some error ->
+                        Mui.alert [
+                            alert.severity.error
+                            alert.sx [ style.marginTop 2 ]
+                            alert.children error
+                        ]
+                    | None -> Html.none
+                    
+                    Mui.paper [
+                        paper.elevation 3
+                        paper.sx [ style.padding 3; style.marginTop 2 ]
+                        paper.children [
+                            Mui.grid [
+                                grid.container true
+                                grid.spacing 3
+                                grid.children [
+                                    // Basic info section
+                                    Mui.grid [
+                                        grid.item true
+                                        grid.xs 12
+                                        grid.children [
+                                            Mui.paper [
+                                                paper.variant.outlined
+                                                paper.sx [ style.padding 2; style.backgroundColor "#f5f5f5" ]
+                                                paper.children [
+                                                    Mui.typography [
+                                                        typography.variant.h6
+                                                        typography.gutterBottom true
+                                                        typography.children "Condition / Features"
+                                                    ]
+                                                    Html.div [
+                                                        for i, note in List.indexed state.Car.ConditionNotes do
+                                                            Mui.grid [
+                                                                grid.container true
+                                                                grid.spacing 1
+                                                                grid.alignItems.center
+                                                                grid.sx [ style.marginTop 1 ]
+                                                                grid.children [
+                                                                    Mui.grid [
+                                                                        grid.item true
+                                                                        grid.xs true
+                                                                        grid.children [
+                                                                            Mui.textField [
+                                                                                textField.fullWidth true
+                                                                                textField.multiline true
+                                                                                textField.rows 2
+                                                                                textField.value note
+                                                                                textField.onChange (fun value -> dispatch (UpdateConditionNote (i, value)))
+                                                                                textField.placeholder "Describe condition or feature..."
+                                                                            ]
+                                                                        ]
+                                                                    ]
+                                                                    Mui.grid [
+                                                                        grid.item true
+                                                                        grid.children [
+                                                                            Mui.iconButton [
+                                                                                iconButton.onClick (fun _ -> dispatch (RemoveConditionNote i))
+                                                                                iconButton.children [
+                                                                                    Mui.icon "close"
+                                                                                ]
+                                                                            ]
+                                                                        ]
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                    ]
+                                                    Mui.button [
+                                                        button.variant.contained
+                                                        button.onClick (fun _ -> dispatch AddConditionNote)
+                                                        button.startIcon (Mui.icon "add")
+                                                        button.sx [ style.marginTop 2 ]
+                                                        button.children "Add entry"
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                    
+                                    // Tyres section
+                                    Mui.grid [
+                                        grid.item true
+                                        grid.xs 12
+                                        grid.lg 5
+                                        grid.children [
+                                            Mui.paper [
+                                                paper.variant.outlined
+                                                paper.sx [ style.padding 2; style.backgroundColor "#f5f5f5" ]
+                                                paper.children [
+                                                    Mui.typography [
+                                                        typography.variant.h6
+                                                        typography.gutterBottom true
+                                                        typography.children "Tyres"
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.container true
+                                                        grid.spacing 2
+                                                        grid.children [
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 6
+                                                                grid.children [
+                                                                    Mui.typography [
+                                                                        typography.variant.subtitle2
+                                                                        typography.children "Front Left"
+                                                                    ]
+                                                                    tyreStatusPicker state.Car.Tyres.FrontLeft (fun status -> 
+                                                                        dispatch (UpdateTyre ("FrontLeft", status)))
+                                                                ]
+                                                            ]
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 6
+                                                                grid.children [
+                                                                    Mui.typography [
+                                                                        typography.variant.subtitle2
+                                                                        typography.children "Front Right"
+                                                                    ]
+                                                                    tyreStatusPicker state.Car.Tyres.FrontRight (fun status -> 
+                                                                        dispatch (UpdateTyre ("FrontRight", status)))
+                                                                ]
+                                                            ]
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 6
+                                                                grid.children [
+                                                                    Mui.typography [
+                                                                        typography.variant.subtitle2
+                                                                        typography.children "Back Left"
+                                                                    ]
+                                                                    tyreStatusPicker state.Car.Tyres.BackLeft (fun status -> 
+                                                                        dispatch (UpdateTyre ("BackLeft", status)))
+                                                                ]
+                                                            ]
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 6
+                                                                grid.children [
+                                                                    Mui.typography [
+                                                                        typography.variant.subtitle2
+                                                                        typography.children "Back Right"
+                                                                    ]
+                                                                    tyreStatusPicker state.Car.Tyres.BackRight (fun status -> 
+                                                                        dispatch (UpdateTyre ("BackRight", status)))
+                                                                ]
+                                                            ]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                    
+                    // Messages log
+                    if not (List.isEmpty state.Messages) then
+                        Mui.accordion [
+                            accordion.sx [ style.marginTop 2 ]
+                            accordion.children [
+                                Mui.accordionSummary [
+                                    accordionSummary.expandIcon (Mui.icon "expand_more")
+                                    accordionSummary.children [
+                                        Mui.typography [
+                                            typography.variant.h6
+                                            typography.children $"Activity Log ({List.length state.Messages})"
+                                        ]
+                                    ]
+                                ]
+                                Mui.accordionDetails [
+                                    Mui.list [
+                                        for message in List.rev state.Messages |> List.take (min 10 (List.length state.Messages)) do
+                                            Mui.listItem [
+                                                Mui.listItemText [
+                                                    listItemText.primary message
+                                                    listItemText.secondary (System.DateTime.Now.ToString("HH:mm:ss"))
+                                                ]
+                                            ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    
+                    // Latest message notification
+                    match List.tryLast state.Messages with
+                    | Some lastMessage when not (String.IsNullOrEmpty lastMessage) ->
+                        Mui.snackbar [
+                            snackbar.open' true
+                            snackbar.message lastMessage
+                            snackbar.anchorOrigin.vertical.bottom
+                            snackbar.anchorOrigin.horizontal.center
+                            snackbar.autoHideDuration 4000
+                        ]
+                    | _ -> Html.none
+                ]
+            ]
+        ]
+    ]
+
+// Program entry point
+open Elmish.React
+
+Program.mkProgram init update view
+|> Program.withReactSynchronous "root"
+|> Program.run.gutterBottom true
+                                                        typography.children "Basic Information"
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.container true
+                                                        grid.spacing 2
+                                                        grid.children [
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 12
+                                                                grid.sm 6
+                                                                grid.md 3
+                                                                grid.children [
+                                                                    Mui.textField [
+                                                                        textField.label "Make"
+                                                                        textField.fullWidth true
+                                                                        textField.required true
+                                                                        textField.value (state.Car.Make |> Option.defaultValue "")
+                                                                        textField.onChange (UpdateMake >> dispatch)
+                                                                        textField.error (state.Car.Make.IsNone && state.IsValidated)
+                                                                        textField.helperText (if state.Car.Make.IsNone && state.IsValidated then "Make is required" else "")
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 12
+                                                                grid.sm 6
+                                                                grid.md 3
+                                                                grid.children [
+                                                                    Mui.textField [
+                                                                        textField.label "Model"
+                                                                        textField.fullWidth true
+                                                                        textField.required true
+                                                                        textField.value (state.Car.Model |> Option.defaultValue "")
+                                                                        textField.onChange (UpdateModel >> dispatch)
+                                                                        textField.error (state.Car.Model.IsNone && state.IsValidated)
+                                                                        textField.helperText (if state.Car.Model.IsNone && state.IsValidated then "Model is required" else "")
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 12
+                                                                grid.sm 6
+                                                                grid.md 3
+                                                                grid.children [
+                                                                    Mui.textField [
+                                                                        textField.label "Year"
+                                                                        textField.fullWidth true
+                                                                        textField.required true
+                                                                        textField.type' "number"
+                                                                        textField.inputProps [!! ("min", 1900); !! ("max", 2100)]
+                                                                        textField.value (state.Car.Year |> Option.map string |> Option.defaultValue "")
+                                                                        textField.onChange (fun value -> 
+                                                                            match System.Int32.TryParse(value) with
+                                                                            | true, year -> dispatch (UpdateYear (Some year))
+                                                                            | false, _ -> dispatch (UpdateYear None)
+                                                                        )
+                                                                        textField.error (state.Car.Year.IsNone && state.IsValidated)
+                                                                        textField.helperText (if state.Car.Year.IsNone && state.IsValidated then "Year is required" else "")
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs 12
+                                                                grid.sm 6
+                                                                grid.md 3
+                                                                grid.children [
+                                                                    Mui.textField [
+                                                                        textField.label "Mileage"
+                                                                        textField.fullWidth true
+                                                                        textField.required true
+                                                                        textField.type' "number"
+                                                                        textField.inputProps [!! ("min", 0); !! ("max", 2000000)]
+                                                                        textField.value (state.Car.Mileage |> Option.map string |> Option.defaultValue "")
+                                                                        textField.onChange (fun value -> 
+                                                                            match System.Int32.TryParse(value) with
+                                                                            | true, mileage -> dispatch (UpdateMileage (Some mileage))
+                                                                            | false, _ -> dispatch (UpdateMileage None)
+                                                                        )
+                                                                        textField.error (state.Car.Mileage.IsNone && state.IsValidated)
+                                                                        textField.helperText (if state.Car.Mileage.IsNone && state.IsValidated then "Mileage is required" else "")
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                    
+                                    // Condition notes section
+                                    Mui.grid [
+                                        grid.item true
+                                        grid.xs 12
+                                        grid.lg 7
+                                        grid.children [
+                                            Mui.paper [
+                                                paper.variant.outlined
+                                                paper.sx [ style.padding 2; style.backgroundColor "#f5f5f5" ]
+                                                paper.children [
+                                                    Mui.typography [
+                                                        typography.variant.h6
+                                                        typography// src/Types.fs
+module Types
+
+open System
+
+type TyreStatus = 
+    | NeedsReplacement
+    | Worn  
+    | Good
+    | New
+
+type TyreStatuses = {
+    FrontLeft: TyreStatus option
+    FrontRight: TyreStatus option
+    BackLeft: TyreStatus option
+    BackRight: TyreStatus option
+}
+
+type CarDescriptor = {
+    Make: string option
+    Model: string option
+    Year: int option
+    Mileage: int option
+    ConditionNotes: string list
+    Tyres: TyreStatuses
+}
+
+type MicStatus = 
+    | Disconnected
+    | Active
+    | Muted
+
+type Msg =
+    | UpdateMake of string
+    | UpdateModel of string
+    | UpdateYear of int option
+    | UpdateMileage of int option
+    | AddConditionNote
+    | UpdateConditionNote of int * string
+    | RemoveConditionNote of int
+    | UpdateTyre of string * TyreStatus option
+    | ToggleMic
+    | MicConnected
+    | AudioDataReceived of byte[]
+    | ModelUpdated of CarDescriptor
+    | MessageAdded of string
+    | ValidationRequested
+
+// src/AudioUtils.fs
+module AudioUtils
+
+open Fable.Core
+open Fable.Core.JsInterop
+open Browser.Types
+open System
+
+[<Import("*", from="./audioProcessor.js")>]
+let audioProcessor: obj = jsNative
+
+type AudioProcessor = 
+    abstract start: (byte[] -> unit) -> JS.Promise<MediaStream>
+    abstract setMute: MediaStream -> bool -> unit
+    abstract dispose: MediaStream -> unit
+
+let processor: AudioProcessor = unbox audioProcessor
+
+// src/OpenAIClient.fs
+module OpenAIClient
+
+open Fable.Core
+open Fable.Core.JsInterop
+open System
+open Types
+
+[<Import("*", from="./openaiRealtime.js")>]
+let realtimeClient: obj = jsNative
+
+type ConversationUpdate = 
+    | SessionStarted
+    | InputSpeechStarted
+    | InputSpeechFinished
+    | OutputDelta of audioBytes: byte[] option * text: string option
+    | ResponseFinished
+    | ToolCall of functionName: string * args: string * callId: string
+
+type RealtimeManager = 
+    abstract startSession: string -> (CarDescriptor -> unit) -> (string -> unit) -> JS.Promise<unit>
+    abstract sendAudio: byte[] -> JS.Promise<unit>
+    abstract updateModel: CarDescriptor -> JS.Promise<unit>
+    abstract dispose: unit -> unit
+
+let manager: RealtimeManager = unbox realtimeClient
+
+// src/Components.fs
+module Components
+
+open Feliz
+open Feliz.MaterialUI
+open Types
+
+let tyreStatusPicker (value: TyreStatus option) (onChange: TyreStatus option -> unit) =
+    Mui.formControl [
+        formControl.fullWidth true
+        formControl.children [
+            Mui.inputLabel "Status"
+            Mui.select [
+                select.value (
+                    match value with
+                    | Some NeedsReplacement -> "NeedsReplacement"
+                    | Some Worn -> "Worn"
+                    | Some Good -> "Good"
+                    | Some New -> "New"
+                    | None -> ""
+                )
+                select.onChange (fun (e: Event) ->
+                    let value = e.target?value
+                    match value with
+                    | "NeedsReplacement" -> onChange (Some NeedsReplacement)
+                    | "Worn" -> onChange (Some Worn)
+                    | "Good" -> onChange (Some Good)
+                    | "New" -> onChange (Some New)
+                    | _ -> onChange None
+                )
+                select.children [
+                    Mui.menuItem [
+                        menuItem.value ""
+                        menuItem.children "Select status"
+                    ]
+                    Mui.menuItem [
+                        menuItem.value "NeedsReplacement"
+                        menuItem.children "Needs Replacement"
+                    ]
+                    Mui.menuItem [
+                        menuItem.value "Worn"
+                        menuItem.children "Worn"
+                    ]
+                    Mui.menuItem [
+                        menuItem.value "Good"
+                        menuItem.children "Good"
+                    ]
+                    Mui.menuItem [
+                        menuItem.value "New"
+                        menuItem.children "New"
+                    ]
+                ]
+            ]
+        ]
+    ]
+
+let micButton (status: MicStatus) (onClick: unit -> unit) =
+    let (color, icon) = 
+        match status with
+        | Disconnected -> ("default", "mic")
+        | Active -> ("primary", "mic")
+        | Muted -> ("secondary", "mic_off")
+    
+    Mui.iconButton [
+        iconButton.color color
+        iconButton.onClick (fun _ -> onClick())
+        iconButton.children [
+            Mui.icon icon
+        ]
+    ]
+
+// src/App.fs
+module App
+
+open Elmish
+open Feliz
+open Feliz.MaterialUI
+open Types
+open Components
+open AudioUtils
+open OpenAIClient
+open Browser.Types
+
+type State = {
+    Car: CarDescriptor
+    MicStatus: MicStatus
+    MicStream: MediaStream option
+    Messages: string list
+    IsValidated: bool
+    IsConnecting: bool
+    Error: string option
+}
+
+let init () = 
+    {
+        Car = {
+            Make = None
+            Model = None
+            Year = None
+            Mileage = None
+            ConditionNotes = []
+            Tyres = {
+                FrontLeft = None
+                FrontRight = None
+                BackLeft = None
+                BackRight = None
+            }
+        }
+        MicStatus = Disconnected
+        MicStream = None
+        Messages = []
+        IsValidated = false
+        IsConnecting = false
+        Error = None
+    }, Cmd.none
+
+let update (msg: Msg) (state: State) =
+    match msg with
+    | UpdateMake value ->
+        { state with Car = { state.Car with Make = if String.IsNullOrEmpty(value) then None else Some value } }, Cmd.none
+    
+    | UpdateModel value ->
+        { state with Car = { state.Car with Model = if String.IsNullOrEmpty(value) then None else Some value } }, Cmd.none
+    
+    | UpdateYear value ->
+        { state with Car = { state.Car with Year = value } }, Cmd.none
+    
+    | UpdateMileage value ->
+        { state with Car = { state.Car with Mileage = value } }, Cmd.none
+    
+    | AddConditionNote ->
+        { state with Car = { state.Car with ConditionNotes = state.Car.ConditionNotes @ [""] } }, Cmd.none
+    
+    | UpdateConditionNote (index, value) ->
+        let newNotes = 
+            state.Car.ConditionNotes 
+            |> List.mapi (fun i note -> if i = index then value else note)
+        { state with Car = { state.Car with ConditionNotes = newNotes } }, Cmd.none
+    
+    | RemoveConditionNote index ->
+        let newNotes = 
+            state.Car.ConditionNotes 
+            |> List.mapi (fun i note -> i, note)
+            |> List.filter (fun (i, _) -> i <> index)
+            |> List.map snd
+        { state with Car = { state.Car with ConditionNotes = newNotes } }, Cmd.none
+    
+    | UpdateTyre (position, status) ->
+        let newTyres = 
+            match position with
+            | "FrontLeft" -> { state.Car.Tyres with FrontLeft = status }
+            | "FrontRight" -> { state.Car.Tyres with FrontRight = status }
+            | "BackLeft" -> { state.Car.Tyres with BackLeft = status }
+            | "BackRight" -> { state.Car.Tyres with BackRight = status }
+            | _ -> state.Car.Tyres
+        { state with Car = { state.Car with Tyres = newTyres } }, Cmd.none
+    
+    | ToggleMic ->
+        match state.MicStatus with
+        | Disconnected ->
+            let cmd = Cmd.OfPromise.either 
+                (processor.start (fun audioData -> AudioDataReceived audioData |> dispatch))
+                ()
+                (fun stream -> MicConnected)
+                (fun ex -> MessageAdded $"Microphone error: {ex.Message}")
+            { state with MicStatus = Active; IsConnecting = true }, cmd
+        | Active ->
+            state.MicStream |> Option.iter (processor.setMute >> (fun f -> f true))
+            { state with MicStatus = Muted }, Cmd.none
+        | Muted ->
+            state.MicStream |> Option.iter (processor.setMute >> (fun f -> f false))
+            { state with MicStatus = Active }, Cmd.none
+    
+    | MicConnected ->
+        let cmd = Cmd.OfPromise.either
+            (manager.startSession "Car to be listed for sale" (ModelUpdated >> dispatch) (MessageAdded >> dispatch))
+            ()
+            (fun _ -> MessageAdded "Connected to AI assistant")
+            (fun ex -> MessageAdded $"Connection error: {ex.Message}")
+        { state with IsConnecting = false }, cmd
+    
+    | AudioDataReceived audioData ->
+        let cmd = Cmd.OfPromise.attempt (manager.sendAudio) audioData (fun _ -> ())
+        state, cmd
+    
+    | ModelUpdated newCar ->
+        let cmd = Cmd.OfPromise.attempt (manager.updateModel) newCar (fun _ -> ())
+        { state with Car = newCar }, cmd
+    
+    | MessageAdded message ->
+        { state with Messages = state.Messages @ [message]; Error = None }, Cmd.none
+    
+    | ValidationRequested ->
+        let validationErrors = validateCar state.Car
+        if List.isEmpty validationErrors then
+            { state with IsValidated = true }, Cmd.of (fun _ -> MessageAdded "Car data is valid!")
+        else
+            { state with Error = Some (String.concat "; " validationErrors) }, Cmd.none
+
+let validateCar (car: CarDescriptor) =
+    let errors = ResizeArray<string>()
+    
+    if car.Make.IsNone then errors.Add("Make is required")
+    if car.Model.IsNone then errors.Add("Model is required")
+    if car.Year.IsNone then errors.Add("Year is required")
+    if car.Mileage.IsNone then errors.Add("Mileage is required")
+    
+    match car.Year with
+    | Some year when year < 1900 || year > 2100 -> errors.Add("Year must be between 1900 and 2100")
+    | _ -> ()
+    
+    match car.Mileage with
+    | Some mileage when mileage < 0 || mileage > 2000000 -> errors.Add("Mileage must be between 0 and 2,000,000")
+    | _ -> ()
+    
+    if car.Tyres.FrontLeft.IsNone then errors.Add("Front left tyre status is required")
+    if car.Tyres.FrontRight.IsNone then errors.Add("Front right tyre status is required")
+    if car.Tyres.BackLeft.IsNone then errors.Add("Back left tyre status is required")
+    if car.Tyres.BackRight.IsNone then errors.Add("Back right tyre status is required")
+    
+    errors |> List.ofSeq
+
+let view (state: State) (dispatch: Msg -> unit) =
+    Mui.container [
+        container.maxWidth.lg
+        container.children [
+            Mui.appBar [
+                appBar.position.static
+                appBar.children [
+                    Mui.toolbar [
+                        Mui.typography [
+                            typography.variant.h6
+                            typography.component' "h1"
+                            typography.sx [ style.flexGrow 1 ]
+                            typography.children "Add a new vehicle"
+                        ]
+                        micButton state.MicStatus (fun () -> dispatch ToggleMic)
+                        Mui.button [
+                            button.variant.contained
+                            button.color.primary
+                            button.onClick (fun _ -> dispatch ValidationRequested)
+                            button.startIcon (Mui.icon "save")
+                            button.children "Save"
+                        ]
+                    ]
+                ]
+            ]
+            
+            Mui.paper [
+                paper.elevation 3
+                paper.sx [ style.padding 3; style.marginTop 2 ]
+                paper.children [
+                    Mui.grid [
+                        grid.container true
+                        grid.spacing 3
+                        grid.children [
+                            // Basic info section
+                            Mui.grid [
+                                grid.item true
+                                grid.xs 12
+                                grid.children [
+                                    Mui.paper [
+                                        paper.sx [ style.padding 2; style.backgroundColor "#f5f5f5" ]
+                                        paper.children [
+                                            Mui.grid [
+                                                grid.container true
+                                                grid.spacing 2
+                                                grid.children [
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 12
+                                                        grid.sm 6
+                                                        grid.md 3
+                                                        grid.children [
+                                                            Mui.textField [
+                                                                textField.label "Make"
+                                                                textField.fullWidth true
+                                                                textField.value (state.Car.Make |> Option.defaultValue "")
+                                                                textField.onChange (UpdateMake >> dispatch)
+                                                            ]
+                                                        ]
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 12
+                                                        grid.sm 6
+                                                        grid.md 3
+                                                        grid.children [
+                                                            Mui.textField [
+                                                                textField.label "Model"
+                                                                textField.fullWidth true
+                                                                textField.value (state.Car.Model |> Option.defaultValue "")
+                                                                textField.onChange (UpdateModel >> dispatch)
+                                                            ]
+                                                        ]
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 12
+                                                        grid.sm 6
+                                                        grid.md 3
+                                                        grid.children [
+                                                            Mui.textField [
+                                                                textField.label "Year"
+                                                                textField.fullWidth true
+                                                                textField.type' "number"
+                                                                textField.value (state.Car.Year |> Option.map string |> Option.defaultValue "")
+                                                                textField.onChange (fun value -> 
+                                                                    match System.Int32.TryParse(value) with
+                                                                    | true, year -> dispatch (UpdateYear (Some year))
+                                                                    | false, _ -> dispatch (UpdateYear None)
+                                                                )
+                                                            ]
+                                                        ]
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 12
+                                                        grid.sm 6
+                                                        grid.md 3
+                                                        grid.children [
+                                                            Mui.textField [
+                                                                textField.label "Mileage"
+                                                                textField.fullWidth true
+                                                                textField.type' "number"
+                                                                textField.value (state.Car.Mileage |> Option.map string |> Option.defaultValue "")
+                                                                textField.onChange (fun value -> 
+                                                                    match System.Int32.TryParse(value) with
+                                                                    | true, mileage -> dispatch (UpdateMileage (Some mileage))
+                                                                    | false, _ -> dispatch (UpdateMileage None)
+                                                                )
+                                                            ]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                            
+                            // Condition notes section
+                            Mui.grid [
+                                grid.item true
+                                grid.xs 12
+                                grid.lg 7
+                                grid.children [
+                                    Mui.paper [
+                                        paper.sx [ style.padding 2; style.backgroundColor "#f5f5f5" ]
+                                        paper.children [
+                                            Mui.typography [
+                                                typography.variant.h6
+                                                typography.gutterBottom true
+                                                typography.children "Condition / Features"
+                                            ]
+                                            Html.div [
+                                                for i, note in List.indexed state.Car.ConditionNotes do
+                                                    Mui.grid [
+                                                        grid.container true
+                                                        grid.spacing 1
+                                                        grid.alignItems.center
+                                                        grid.sx [ style.marginTop 1 ]
+                                                        grid.children [
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.xs true
+                                                                grid.children [
+                                                                    Mui.textField [
+                                                                        textField.fullWidth true
+                                                                        textField.multiline true
+                                                                        textField.value note
+                                                                        textField.onChange (fun value -> dispatch (UpdateConditionNote (i, value)))
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                            Mui.grid [
+                                                                grid.item true
+                                                                grid.children [
+                                                                    Mui.iconButton [
+                                                                        iconButton.onClick (fun _ -> dispatch (RemoveConditionNote i))
+                                                                        iconButton.children [
+                                                                            Mui.icon "close"
+                                                                        ]
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                        ]
+                                                    ]
+                                            ]
+                                            Mui.button [
+                                                button.variant.contained
+                                                button.onClick (fun _ -> dispatch AddConditionNote)
+                                                button.startIcon (Mui.icon "add")
+                                                button.sx [ style.marginTop 2 ]
+                                                button.children "Add entry"
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                            
+                            // Tyres section
+                            Mui.grid [
+                                grid.item true
+                                grid.xs 12
+                                grid.lg 5
+                                grid.children [
+                                    Mui.paper [
+                                        paper.sx [ style.padding 2; style.backgroundColor "#f5f5f5" ]
+                                        paper.children [
+                                            Mui.typography [
+                                                typography.variant.h6
+                                                typography.gutterBottom true
+                                                typography.children "Tyres"
+                                            ]
+                                            Mui.grid [
+                                                grid.container true
+                                                grid.spacing 2
+                                                grid.children [
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 6
+                                                        grid.children [
+                                                            Mui.typography [
+                                                                typography.variant.subtitle2
+                                                                typography.children "Front Left"
+                                                            ]
+                                                            tyreStatusPicker state.Car.Tyres.FrontLeft (fun status -> 
+                                                                dispatch (UpdateTyre ("FrontLeft", status)))
+                                                        ]
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 6
+                                                        grid.children [
+                                                            Mui.typography [
+                                                                typography.variant.subtitle2
+                                                                typography.children "Front Right"
+                                                            ]
+                                                            tyreStatusPicker state.Car.Tyres.FrontRight (fun status -> 
+                                                                dispatch (UpdateTyre ("FrontRight", status)))
+                                                        ]
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 6
+                                                        grid.children [
+                                                            Mui.typography [
+                                                                typography.variant.subtitle2
+                                                                typography.children "Back Left"
+                                                            ]
+                                                            tyreStatusPicker state.Car.Tyres.BackLeft (fun status -> 
+                                                                dispatch (UpdateTyre ("BackLeft", status)))
+                                                        ]
+                                                    ]
+                                                    Mui.grid [
+                                                        grid.item true
+                                                        grid.xs 6
+                                                        grid.children [
+                                                            Mui.typography [
+                                                                typography.variant.subtitle2
+                                                                typography.children "Back Right"
+                                                            ]
+                                                            tyreStatusPicker state.Car.Tyres.BackRight (fun status -> 
+                                                                dispatch (UpdateTyre ("BackRight", status)))
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+            
+            // Messages log
+            if not (List.isEmpty state.Messages) then
+                Mui.paper [
+                    paper.sx [ style.padding 2; style.marginTop 2 ]
+                    paper.children [
+                        Mui.typography [
+                            typography.variant.h6
+                            typography.children $"Log ({List.length state.Messages})"
+                        ]
+                        Html.ul [
+                            for message in state.Messages do
+                                Html.li [ Html.text message ]
+                        ]
+                    ]
+                ]
+            
+            // Latest message notification
+            match List.tryLast state.Messages with
+            | Some lastMessage ->
+                Mui.snackbar [
+                    snackbar.open' true
+                    snackbar.message lastMessage
+                    snackbar.anchorOrigin.vertical.bottom
+                    snackbar.anchorOrigin.horizontal.center
+                ]
+            | None -> Html.none
+        ]
+    ]
+
+// Program entry point
+open Elmish.React
+
+Program.mkProgram init update view
+|> Program.withReactSynchronous "root"
+|> Program.run

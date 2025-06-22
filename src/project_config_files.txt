@@ -1,0 +1,170 @@
+// package.json
+{
+  "name": "fsharp-realtime-voice-form",
+  "version": "1.0.0",
+  "description": "F# real-time voice form with OpenAI integration",
+  "main": "src/App.fs",
+  "scripts": {
+    "build": "webpack --mode development",
+    "start": "webpack serve --mode development",
+    "build:prod": "webpack --mode production"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/lab": "^4.0.0-alpha.61",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-react": "^7.22.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "file-loader": "^6.2.0",
+    "fable-compiler": "^4.0.0",
+    "fable-loader": "^2.1.9",
+    "html-webpack-plugin": "^5.5.3",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.0"
+  }
+}
+
+// webpack.config.js
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  entry: './src/App.fs.js',
+  mode: 'development',
+  devtool: 'source-map',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
+    clean: true
+  },
+  devServer: {
+    static: './dist',
+    port: 8080,
+    hot: true,
+    historyApiFallback: true
+  },
+  module: {
+    rules: [
+      {
+        test: /\.fs$/,
+        use: 'fable-loader'
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-react']
+          }
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource'
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './public/index.html'
+    })
+  ],
+  resolve: {
+    extensions: ['.fs', '.js', '.json']
+  }
+};
+
+// .fablerc
+{
+  "compilerOptions": {
+    "define": ["FABLE_COMPILER", "FABLE_COMPILER_3"]
+  },
+  "sourceMaps": true,
+  "babel": {
+    "presets": [
+      ["@babel/preset-env", {
+        "targets": {
+          "browsers": ["last 2 versions"]
+        },
+        "modules": false
+      }]
+    ]
+  }
+}
+
+// src/RealtimeVoiceForm.fsproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Types.fs" />
+    <Compile Include="AudioUtils.fs" />
+    <Compile Include="OpenAIClient.fs" />
+    <Compile Include="Components.fs" />
+    <Compile Include="App.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="4.0.0" />
+    <PackageReference Include="Fable.Elmish" Version="4.0.0" />
+    <PackageReference Include="Fable.Elmish.React" Version="4.0.0" />
+    <PackageReference Include="Fable.React" Version="9.0.0" />
+    <PackageReference Include="Feliz" Version="2.0.0" />
+    <PackageReference Include="Feliz.MaterialUI" Version="2.0.0" />
+  </ItemGroup>
+</Project>
+
+// public/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Real-time Voice Form</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+        }
+        #root {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
+
+// .env.example
+OPENAI_API_KEY=your_openai_api_key_here
+
+// .gitignore
+node_modules/
+dist/
+.env
+.DS_Store
+bin/
+obj/
+*.user
+.vs/
+.vscode/
+*.log
