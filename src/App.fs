@@ -112,6 +112,7 @@ let update (msg: Msg) (state: State) =
     | ToggleMic ->
         match state.MicStatus with
         | Disconnected ->
+            console.log processor
             let startAudio () = 
                 processor.start (fun audioData -> ())
             let cmd = Cmd.OfPromise.either startAudio () (fun stream -> MicConnected) (fun ex -> MessageAdded $"Microphone error: {ex.Message}")
@@ -152,7 +153,7 @@ let inline toReact (el: JSX.Element) : ReactElement = unbox el
 
 
 [<JSX.Component>]
-let view (state: State) (dispatch: Msg -> unit) =
+let View (state: State) (dispatch: Msg -> unit) =
     let handleMakeChange = fun ev -> ev?target?value |> UpdateMake |> dispatch
     let handleModelChange = fun ev -> ev?target?value |> UpdateModel |> dispatch
     let handleYearChange = fun ev -> 
@@ -373,6 +374,6 @@ let view (state: State) (dispatch: Msg -> unit) =
 
 open Elmish.React
 
-Program.mkProgram init update view
+Program.mkProgram init update View
 |> Program.withReactSynchronous "root"
 |> Program.run

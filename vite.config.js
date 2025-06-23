@@ -4,10 +4,10 @@ import Inspect from "vite-plugin-inspect"
 
 
 export default defineConfig({
-  root: './src',
-  publicDir: './public',
+  root: './',
+  publicDir: './src/public',
   build: {
-    outDir: '../dist',
+    outDir: './dist',
     chunkSizeWarningLimit: 600,
     emptyOutDir: true
   },

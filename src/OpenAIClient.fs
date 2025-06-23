@@ -5,7 +5,7 @@ open Fable.Core.JsInterop
 open System
 open Types
 
-[<Import("*", from="./openaiRealtime.js")>]
+[<Import("realtimeClient", from="./openaiRealtime.js")>]
 let realtimeClient: obj = jsNative
 
 type ConversationUpdate = 

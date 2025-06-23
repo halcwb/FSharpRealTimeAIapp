@@ -1,9 +1,13 @@
 // src/openaiRealtime.js
+
+// Import AudioProcessor from the same directory
+import { AudioProcessor } from './AudioProcessor.js';
+
 export class RealtimeManager {
     constructor() {
         this.session = null;
         this.isConnected = false;
-        this.apiKey = process.env.OPENAI_API_KEY || 'your-api-key-here';
+        this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || 'your-api-key-here';
         this.audioContext = null;
         this.audioQueue = [];
         this.isPlaying = false;
@@ -316,4 +320,3 @@ export class RealtimeManager {
 // Export singleton instances
 export const audioProcessor = new AudioProcessor();
 export const realtimeClient = new RealtimeManager();
-                

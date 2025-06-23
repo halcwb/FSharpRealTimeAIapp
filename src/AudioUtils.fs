@@ -6,7 +6,7 @@ open Browser.Types
 open Fable.Core.JS
 open System
 
-[<Import("*", from="./audioProcessor.js")>]
+[<Import("audioProcessor", from="./openaiRealtime.js")>]
 let audioProcessor: obj = jsNative
 
 type AudioProcessor = 
