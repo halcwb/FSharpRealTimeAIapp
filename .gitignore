@@ -4,6 +4,7 @@
 # Include source files
 !src/
 !src/**/*.fs
+!src/**/*.js
 !src/**/*.fsx
 !src/**/*.fsproj
 
