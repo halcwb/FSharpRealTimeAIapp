@@ -1,6 +1,11 @@
 # use an opt in strategy
 *
 
+# Add paket targets
+!/.paket/
+!/.paket/Paket.Restore.targets
+
+
 # Include source files
 !src/
 !src/**/*.fs
