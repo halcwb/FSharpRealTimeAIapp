@@ -30,10 +30,11 @@
     },
     "scripts": {
         "restore-tools": "dotnet tool restore",
-        "fable": "dotnet fable src/RealTimeAIApp.fsproj --outDir build --extension .jsx",
-        "fable:watch": "dotnet fable watch src/RealTimeAIApp.fsproj --outDir build --extension .jsx",
+        "fable": "dotnet fable src/RealTimeAIApp.fsproj --outDir dist --extension .jsx",
+        "fable:watch": "dotnet fable watch src/RealTimeAIApp.fsproj --outDir dist --extension .jsx",
+        "copy-js": "cp -r src/*.js dist/ 2>/dev/null || true",
         "dev": "npm run fable:watch & vite",
-        "build": "npm run fable && vite build",
+        "build": "npm run fable && npm run copy-js && vite build",
         "preview": "vite preview",
         "clean": "rm -rf dist build"
     }
