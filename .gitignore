@@ -2,6 +2,9 @@
 *
 
 # Add paket targets
+!paket.dependencies
+!paket.lock
+!paket.references
 !/.paket/
 !/.paket/Paket.Restore.targets
 
